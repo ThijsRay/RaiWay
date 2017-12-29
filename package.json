@@ -1,0 +1,26 @@
+{
+  "name": "raiway",
+  "version": "1.0.0",
+  "description": "A simple payment system for RaiBlocks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThijsRay/RaiWay.git"
+  },
+  "keywords": [
+    "raiblocks",
+    "rai"
+  ],
+  "author": "Thijs Raymakers",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/ThijsRay/RaiWay/issues"
+  },
+  "homepage": "https://github.com/ThijsRay/RaiWay#readme",
+  "dependencies": {
+    "request": "^2.83.0"
+  }
+}
