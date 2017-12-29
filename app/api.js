@@ -19,10 +19,43 @@ router.get('/get_block_count', function(req, res) {
 });
 
 router.post('/request-payment-token', function(req, res) {
-    let newTransaction = new transaction.Transaction();
+    // Create new transaction
+    let newTransaction = new transaction.Transaction(req.connection.remoteAddress);
+    
+    // Add transaction to current list of transactions
     transaction.transactions.push(newTransaction);
-    console.log(transaction.transactions);
+
+    // Send the randomly generated payment token to the client
     res.send(newTransaction.getPaymentToken());
+});
+
+router.post('/request-payment', function(req, res) {
+    console.log(req.body);
+    if(req.body.token === undefined) {
+        res.send("Please request a payment token with /request-payment-token and set the field 'token'");
+        return;
+    }
+
+    if(req.body.amount === undefined) {
+
+    }
+
+    if(req.body.receive_wallet === undefined) {
+
+    }
+
+    if(req.body.callback_url === undefined) {
+
+    }
+
+    let thisTransaction = transaction.getTransactionBasedOnPaymentToken(req.body.token, function(tx) {
+        console.log(tx);
+        if(tx === undefined) {
+            res.send("Transaction not found");
+        } else {
+            res.send("OK");
+        }
+    });
 });
 
 module.exports = router;
