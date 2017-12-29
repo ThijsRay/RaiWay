@@ -29,31 +29,43 @@ router.post('/request-payment-token', function(req, res) {
     res.send(newTransaction.getPaymentToken());
 });
 
+/** 
+ * A payment request requires multiple fields
+ *  - "token": The token provided by /request-payment-token.
+ *  - "amount": The amount in xrb.
+ *  - "merchant_wallet": The wallet the xrb should be sent to after the payment has been completed.
+ *  - "callback_url": The URL that should receive a POST request when payment has been completed.
+ */
 router.post('/request-payment', function(req, res) {
-    console.log(req.body);
     if(req.body.token === undefined) {
         res.send("Please request a payment token with /request-payment-token and set the field 'token'");
         return;
     }
 
     if(req.body.amount === undefined) {
-
+        res.send("Please define the amount of xrb that should be sent.");
+        return;
     }
 
-    if(req.body.receive_wallet === undefined) {
-
+    if(req.body.merchant_wallet === undefined) {
+        res.send("Please define the merchant wallet.")
+        return;
     }
 
     if(req.body.callback_url === undefined) {
-
+        res.send("Please define the callback URL");
+        return;        
     }
 
     let thisTransaction = transaction.getTransactionBasedOnPaymentToken(req.body.token, function(tx) {
-        console.log(tx);
         if(tx === undefined) {
-            res.send("Transaction not found");
+            res.send("Incorrect token");
         } else {
-            res.send("OK");
+            if(tx.getOrigin() !== req.connection.remoteAddress) {
+                res.send("Incorrect IP address");
+            } else {
+                res.send("OK");
+            }
         }
     });
 });
