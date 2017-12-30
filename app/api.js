@@ -8,6 +8,14 @@ const rpc = require('./rpc.js').rpc_actions("http://[::1]:7076");
 // Load transaction class
 const transaction = require('./transaction.js');
 
+// Wallet
+let wallet;
+
+rpc.wallet_create(function(body) {
+    wallet = body.wallet;
+    console.log(wallet)
+});
+
 router.get('/', function(req, res) {
     res.send('Please specify the API function you want to use.');
 });
@@ -33,7 +41,7 @@ router.post('/request-payment-token', function(req, res) {
  * A payment request requires multiple fields
  *  - "token": The token provided by /request-payment-token.
  *  - "amount": The amount in xrb.
- *  - "merchant_wallet": The wallet the xrb should be sent to after the payment has been completed.
+ *  - "merchant_address": The wallet the xrb should be sent to after the payment has been completed.
  *  - "callback_url": The URL that should receive a POST request when payment has been completed.
  */
 router.post('/request-payment', function(req, res) {
@@ -47,8 +55,8 @@ router.post('/request-payment', function(req, res) {
         return;
     }
 
-    if(req.body.merchant_wallet === undefined) {
-        res.send("Please define the merchant wallet.")
+    if(req.body.merchant_address === undefined) {
+        res.send("Please define the merchant address.")
         return;
     }
 
@@ -64,7 +72,18 @@ router.post('/request-payment', function(req, res) {
             if(tx.getOrigin() !== req.connection.remoteAddress) {
                 res.send("Incorrect IP address");
             } else {
-                res.send("OK");
+                tx.setAmount(req.body.amount);
+                tx.setMerchantAddress(req.body.merchant_address);
+                tx.setCallbackUrl(req.body.callback_url);
+
+                if(tx.getReceivingAddress() === undefined) {
+                    rpc.payment_begin(wallet, function(body) {
+                        tx.setReceivingAddress(body.account);
+                        res.send(tx.getReceivingAddress());
+                    });
+                } else {
+                    res.send(tx.getReceivingAddress());
+                }
             }
         }
     });
